@@ -2,19 +2,19 @@ function Header(props) {
     return <h1>{props.course}</h1>;
 }
 
+function Part(props) {
+   return <p>
+        {props.name} {props.numExercises}
+    </p>;
+}
+
 function Content(props) {
     return (
-        <>
-            <p>
-                {props.parts[0].name} {props.parts[0].numExercises}
-            </p>
-            <p>
-                {props.parts[1].name} {props.parts[1].numExercises}
-            </p>
-            <p>
-                {props.parts[2].name} {props.parts[2].numExercises}
-            </p>
-        </>
+        <div>
+			<Part name={props.parts[0].name} numExercises={props.parts[0].numExercises} />
+			<Part name={props.parts[1].name} numExercises={props.parts[1].numExercises} />
+			<Part name={props.parts[2].name} numExercises={props.parts[2].numExercises} />
+        </div>
     );
 }
 
