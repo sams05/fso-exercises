@@ -8,6 +8,11 @@ const Option = ({ onClick, text }) => {
 
 const Statistics = ({ counts: { good, neutral, bad } }) => {
     const totalCount = good + neutral + bad;
+
+    if (totalCount === 0) {
+        return <p>No feedback given</p>;
+    }
+
     const totalVal = good - bad;
 
     return (
