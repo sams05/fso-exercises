@@ -2,9 +2,9 @@ import { useState } from 'react';
 
 const Heading = ({ text }) => <h1>{text}</h1>;
 
-const Option = ({ onClick, text }) => {
-    return <button onClick={onClick}>{text}</button>;
-};
+const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>;
+
+const StatisticLine = ({text, value}) => <p>{text} {value}</p>;
 
 const Statistics = ({ counts: { good, neutral, bad } }) => {
     const totalCount = good + neutral + bad;
@@ -17,12 +17,12 @@ const Statistics = ({ counts: { good, neutral, bad } }) => {
 
     return (
         <div>
-            <p>good {good}</p>
-            <p>neutral {neutral}</p>
-            <p>bad {bad}</p>
-            <p>all {totalCount}</p>
-            <p>average {totalVal / totalCount}</p>
-            <p>positive {(good / totalCount) * 100}%</p>
+			<StatisticLine text="good" value={good} />
+			<StatisticLine text="neutral" value={neutral} />
+			<StatisticLine text="bad" value={bad} />
+			<StatisticLine text="all" value={totalCount} />
+			<StatisticLine text="average" value={totalVal / totalCount} />
+			<StatisticLine text="positive" value={`${(good / totalCount) * 100}%`} />
         </div>
     );
 };
@@ -33,7 +33,7 @@ const App = () => {
     const [neutral, setNeutral] = useState(0);
     const [bad, setBad] = useState(0);
 
-    const createFeedbackHandler = (choice, setChoice) => {
+    const createButtonHandler = (choice, setChoice) => {
         const incrementCount = () => {
             setChoice(++choice);
         };
@@ -43,9 +43,9 @@ const App = () => {
     return (
         <div>
             <Heading text={'give feedback'} />
-            <Option onClick={createFeedbackHandler(good, setGood)} text="good" />
-            <Option onClick={createFeedbackHandler(neutral, setNeutral)} text="neutral" />
-            <Option onClick={createFeedbackHandler(bad, setBad)} text="bad" />
+            <Button onClick={createButtonHandler(good, setGood)} text="good" />
+            <Button onClick={createButtonHandler(neutral, setNeutral)} text="neutral" />
+            <Button onClick={createButtonHandler(bad, setBad)} text="bad" />
             <Heading text={'statistics'} />
             <Statistics counts={{ good, neutral, bad }} />
         </div>
