@@ -1,6 +1,15 @@
 import { useState } from 'react';
 
+const Heading = ({ text }) => <h1>{text}</h1>;
+
 const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>;
+
+const Anecdote = ({ anecdotes, points, index }) => (
+    <div>
+        <div>{anecdotes[index]}</div>
+        <p>has {points[index]} points</p>
+    </div>
+);
 
 const App = () => {
     const anecdotes = [
@@ -16,11 +25,10 @@ const App = () => {
 
     const [selected, setSelected] = useState(0);
     const [points, setPoints] = useState(Array(anecdotes.length).fill(0));
-    console.log(points[selected]);
 
     const vote = (selected) => {
         const newPoints = [...points];
-		newPoints[selected]++
+        newPoints[selected]++;
         setPoints(newPoints);
     };
 
@@ -32,12 +40,27 @@ const App = () => {
 
     const handleNextAnecdoteBtn = () => getRandAnecdotes();
 
+    const getHighestVote = () => {
+        let idx = 0;
+        let highest = 0;
+        for (let i = 0; i < points.length; i++) {
+            if (points[i] > highest) {
+                highest = points[i];
+                idx = i;
+            }
+        }
+        return idx;
+    };
+
     return (
         <div>
-            <div>{anecdotes[selected]}</div>
-			<p>has {points[selected]} votes</p>
+            <Heading text="Anecdote of the day" />
+            <Anecdote anecdotes={anecdotes} points={points} index={selected} />
             <Button onClick={handleVote} text="vote" />
             <Button onClick={handleNextAnecdoteBtn} text="next anecdote" />
+
+            <Heading text="Anecdote with most votes" />
+            <Anecdote anecdotes={anecdotes} points={points} index={getHighestVote()} />
         </div>
     );
 };
