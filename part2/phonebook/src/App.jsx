@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import Filter from './components/Filter';
+import PersonForm from './components/PersonForm';
+import Persons from './components/Persons';
 
 const App = () => {
     const [persons, setPersons] = useState([
@@ -11,15 +14,15 @@ const App = () => {
     const [newNumber, setNewNumber] = useState('');
     const [query, setQuery] = useState('');
 
-    const handleQueryOnChange = (e) => {
+    const handleFilterOnChange = (e) => {
         setQuery(e.target.value.toLowerCase());
     };
 
-    const handleNameOnChange = (e) => {
+    const handleOnNameChange = (e) => {
         setNewName(e.target.value);
     };
 
-    const handleNumberOnChange = (e) => {
+    const handleOnNumberChange = (e) => {
         setNewNumber(e.target.value);
     };
 
@@ -47,27 +50,17 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-            <div>
-                filter shown with <input value={query} onChange={handleQueryOnChange} />
-            </div>
+            <Filter query={query} onChange={handleFilterOnChange} />
             <h2>add a new</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    name: <input value={newName} onChange={handleNameOnChange} />
-                </div>
-                <div>
-                    number: <input value={newNumber} onChange={handleNumberOnChange} />
-                </div>
-                <div>
-                    <button type="submit">add</button>
-                </div>
-            </form>
+            <PersonForm
+                onSubmit={handleSubmit}
+                nameVal={newName}
+                numberVal={newNumber}
+                onNameChange={handleOnNameChange}
+                onNumberChange={handleOnNumberChange}
+            />
             <h2>Numbers</h2>
-            {personsToShow.map((person) => (
-                <p key={person.id}>
-                    {person.name} {person.number}
-                </p>
-            ))}
+			<Persons persons={personsToShow} />
         </div>
     );
 };
