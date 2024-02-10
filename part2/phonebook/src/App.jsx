@@ -26,12 +26,24 @@ const App = () => {
         setNewNumber(e.target.value);
     };
 
+    const changeNumber = (personToChange) => {
+        const userConfirmed = window.confirm(`${personToChange.name} is already added to phonebook, replace the old number with a new one?`);
+        if(userConfirmed) {
+            const changedPerson = {...personToChange, number: newNumber}
+            personService.change(changedPerson.id, changedPerson).then((updatedPerson) => {
+                setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson));
+                setNewName('');
+                setNewNumber('');
+            })
+        }
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         // Check if name is already in phonebook
-        const invalid = persons.some((person) => person.name === newName);
-        if (invalid) {
-            alert(`${newName} is already added to the phonebook`);
+        const foundPerson = persons.find((person) => person.name === newName);
+        if (foundPerson) {
+            changeNumber(foundPerson);
             return;
         }
         // Add new person
