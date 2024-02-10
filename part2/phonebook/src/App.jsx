@@ -14,15 +14,15 @@ const App = () => {
         personService.getAll().then((initialPersons) => setPersons(initialPersons));
     }, []);
 
-    const handleFilterOnChange = (e) => {
+    const handleFilterChange = (e) => {
         setQuery(e.target.value.toLowerCase());
     };
 
-    const handleOnNameChange = (e) => {
+    const handleNameChange = (e) => {
         setNewName(e.target.value);
     };
 
-    const handleOnNumberChange = (e) => {
+    const handleNumberChange = (e) => {
         setNewNumber(e.target.value);
     };
 
@@ -47,22 +47,32 @@ const App = () => {
         });
     };
 
+    const handleDeletePerson = (id) => {
+        const personToDelete = persons.find(({ id: curId }) => id === curId);
+        const userConfirmed = window.confirm(`Delete ${personToDelete.name}?`);
+        if (userConfirmed) {
+            personService.deletePerson(id).then((deletedPerson) => {
+                setPersons(persons.filter(({ id }) => id != deletedPerson.id));
+            });
+        }
+    };
+
     const personsToShow = persons.filter(({ name }) => name.toLowerCase().includes(query));
 
     return (
         <div>
             <h2>Phonebook</h2>
-            <Filter query={query} onChange={handleFilterOnChange} />
+            <Filter query={query} onChange={handleFilterChange} />
             <h2>add a new</h2>
             <PersonForm
                 onSubmit={handleSubmit}
                 nameVal={newName}
                 numberVal={newNumber}
-                onNameChange={handleOnNameChange}
-                onNumberChange={handleOnNumberChange}
+                onNameChange={handleNameChange}
+                onNumberChange={handleNumberChange}
             />
             <h2>Numbers</h2>
-            <Persons persons={personsToShow} />
+            <Persons persons={personsToShow} deletePerson={handleDeletePerson} />
         </div>
     );
 };
