@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
+import Notification from './components/Notification';
 import personService from './services/persons';
 
 const App = () => {
@@ -9,10 +10,23 @@ const App = () => {
     const [newName, setNewName] = useState('');
     const [newNumber, setNewNumber] = useState('');
     const [query, setQuery] = useState('');
+    const [message, setMessage] = useState(null);
 
     useEffect(() => {
         personService.getAll().then((initialPersons) => setPersons(initialPersons));
     }, []);
+
+    /**
+     * Show a notification with the given message for ms milliseconds
+     * @param {String} message
+     * @param {Number} ms
+     */
+    const showNotification = (message, ms = 5000) => {
+        setMessage(message);
+        setTimeout(() => {
+            setMessage(null);
+        }, ms);
+    };
 
     const handleFilterChange = (e) => {
         setQuery(e.target.value.toLowerCase());
@@ -27,16 +41,19 @@ const App = () => {
     };
 
     const changeNumber = (personToChange) => {
-        const userConfirmed = window.confirm(`${personToChange.name} is already added to phonebook, replace the old number with a new one?`);
-        if(userConfirmed) {
-            const changedPerson = {...personToChange, number: newNumber}
+        const userConfirmed = window.confirm(
+            `${personToChange.name} is already added to phonebook, replace the old number with a new one?`
+        );
+        if (userConfirmed) {
+            const changedPerson = { ...personToChange, number: newNumber };
             personService.change(changedPerson.id, changedPerson).then((updatedPerson) => {
-                setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson));
+                setPersons(persons.map((person) => (person.id !== updatedPerson.id ? person : updatedPerson)));
                 setNewName('');
                 setNewNumber('');
-            })
+                showNotification(`${updatedPerson.name}'s phone number has been updated`, 4000);
+            });
         }
-    }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -56,6 +73,7 @@ const App = () => {
             setPersons(persons.concat(newPerson));
             setNewName('');
             setNewNumber('');
+            showNotification(`Added ${newPerson.name}`, 4000);
         });
     };
 
@@ -74,6 +92,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={message} />
             <Filter query={query} onChange={handleFilterChange} />
             <h2>add a new</h2>
             <PersonForm
