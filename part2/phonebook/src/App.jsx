@@ -11,6 +11,7 @@ const App = () => {
     const [newNumber, setNewNumber] = useState('');
     const [query, setQuery] = useState('');
     const [message, setMessage] = useState(null);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         personService.getAll().then((initialPersons) => setPersons(initialPersons));
@@ -21,10 +22,15 @@ const App = () => {
      * @param {String} message
      * @param {Number} ms
      */
-    const showNotification = (message, ms = 5000) => {
+    const showNotification = (message, ms = 5000, error = false) => {
         setMessage(message);
+        if(error) {
+            setError(true);
+        }
         setTimeout(() => {
+            // Reset notification states
             setMessage(null);
+            setError(false);
         }, ms);
     };
 
@@ -46,12 +52,18 @@ const App = () => {
         );
         if (userConfirmed) {
             const changedPerson = { ...personToChange, number: newNumber };
-            personService.change(changedPerson.id, changedPerson).then((updatedPerson) => {
-                setPersons(persons.map((person) => (person.id !== updatedPerson.id ? person : updatedPerson)));
-                setNewName('');
-                setNewNumber('');
-                showNotification(`${updatedPerson.name}'s phone number has been updated`, 4000);
-            });
+            personService
+                .change(changedPerson.id, changedPerson)
+                .then((updatedPerson) => {
+                    setPersons(persons.map((person) => (person.id !== updatedPerson.id ? person : updatedPerson)));
+                    setNewName('');
+                    setNewNumber('');
+                    showNotification(`${updatedPerson.name}'s phone number has been updated`, 4000);
+                })
+                .catch(() => {
+                    setPersons(persons.filter(({ id }) => id != personToChange.id));
+                    showNotification(`Information of ${personToChange.name} has already been removed from server`, 4000, true);
+                });
         }
     };
 
@@ -92,7 +104,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-            <Notification message={message} />
+            <Notification message={message} error={error} />
             <Filter query={query} onChange={handleFilterChange} />
             <h2>add a new</h2>
             <PersonForm
