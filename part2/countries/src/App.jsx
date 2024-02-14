@@ -17,12 +17,16 @@ function App() {
         setQuery(e.target.value);
     };
 
+    const showCountry = (country) => {
+        setQuery(country.name.common);
+    };
+
     const searchResult = countries.filter((country) => country.name.common.toLowerCase().includes(query.toLowerCase()));
 
     return (
         <div>
             <Filter query={query} filter={handleFilter} />
-            <SearchResult searchResult={searchResult} />
+            <SearchResult searchResult={searchResult} showCountry={showCountry} />
         </div>
     );
 }

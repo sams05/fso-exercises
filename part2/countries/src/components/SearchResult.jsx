@@ -1,13 +1,13 @@
 import Country from "./Country";
 
-const SearchResult = ({ searchResult }) => {
+const SearchResult = ({ searchResult, showCountry }) => {
     if (searchResult.length > 10) {
         return <p>Too many matches, specify another filter</p>;
     } else if (searchResult.length > 1) {
         return (
             <ul>
                 {searchResult.map((country) => (
-                    <li key={country.name.common}>{country.name.common}</li>
+                    <li key={country.name.common}>{country.name.common}<button onClick={() => showCountry(country)}>show</button></li>
                 ))}
             </ul>
         );
