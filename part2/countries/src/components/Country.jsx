@@ -1,4 +1,18 @@
+import { useState, useEffect } from 'react';
+import weatherService from '../services/weather';
+import Weather from './Weather';
+
 const Country = ({ country }) => {
+    const [weather, setWeather] = useState(null);
+    useEffect(() => {
+        const {
+            capitalInfo: {
+                latlng: [lat, lon],
+            },
+        } = country;
+        weatherService.get(lat, lon).then((weather) => setWeather(weather));
+    }, [country]);
+
     const {
         name,
         capital: [capital],
@@ -8,8 +22,10 @@ const Country = ({ country }) => {
     } = country;
 
     const flagStyle = {
-        width: 200
-    }
+        width: 200,
+    };
+
+    const weatherComponent = weather ? <Weather location={capital} weather={weather} /> : null;
 
     return (
         <div>
@@ -23,6 +39,7 @@ const Country = ({ country }) => {
                 ))}
             </ul>
             <img src={flags.svg} alt={flags.alt} style={flagStyle} />
+            {weatherComponent}
         </div>
     );
 };
