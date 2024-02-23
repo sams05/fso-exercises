@@ -24,7 +24,7 @@ const App = () => {
      */
     const showNotification = (message, ms = 5000, error = false) => {
         setMessage(message);
-        if(error) {
+        if (error) {
             setError(true);
         }
         setTimeout(() => {
@@ -62,7 +62,11 @@ const App = () => {
                 })
                 .catch(() => {
                     setPersons(persons.filter(({ id }) => id != personToChange.id));
-                    showNotification(`Information of ${personToChange.name} has already been removed from server`, 4000, true);
+                    showNotification(
+                        `Information of ${personToChange.name} has already been removed from server`,
+                        4000,
+                        true
+                    );
                 });
         }
     };
@@ -81,12 +85,17 @@ const App = () => {
             number: newNumber,
         };
 
-        personService.create(newPerson).then((newPerson) => {
-            setPersons(persons.concat(newPerson));
-            setNewName('');
-            setNewNumber('');
-            showNotification(`Added ${newPerson.name}`, 4000);
-        });
+        personService
+            .create(newPerson)
+            .then((newPerson) => {
+                setPersons(persons.concat(newPerson));
+                setNewName('');
+                setNewNumber('');
+                showNotification(`Added ${newPerson.name}`, 4000);
+            })
+            .catch((error) => {
+                showNotification(error.response.data.error, 4000, true);
+            });
     };
 
     const handleDeletePerson = (id) => {
