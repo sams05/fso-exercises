@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
-import { vote as countVote } from '../reducers/anecdoteReducer'
+import { anecdoteVoted } from '../reducers/anecdoteReducer'
 
 const Anecdote = ({ anecdote, handleClick }) => (
   <div>
@@ -27,7 +27,7 @@ const AnecdoteList = () => {
   const dispatch = useDispatch()
 
   const vote = (id) => {
-    dispatch(countVote(id))
+    dispatch(anecdoteVoted(id))
   }
 
   const sortedAnecdotes = anecdotes.toSorted((anecdote1, anecdote2) => anecdote2.votes - anecdote1.votes)
