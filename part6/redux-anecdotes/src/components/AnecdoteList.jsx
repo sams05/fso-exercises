@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
 import { anecdoteVoted } from '../reducers/anecdoteReducer'
+import { createSelector } from '@reduxjs/toolkit'
 
 const Anecdote = ({ anecdote, handleClick }) => (
   <div>
@@ -21,9 +22,12 @@ Anecdote.propTypes = {
 }
 
 const AnecdoteList = () => {
-  const anecdotes = useSelector(({ anecdotes, filter }) => {
-    return anecdotes.filter(({ content }) => content.toLowerCase().includes(filter.toLowerCase()))
-  })
+  const anecdotes = useSelector(
+    // If state.anecdotes and state.filter remains the same (===), the selector returns the memoized result
+    createSelector([(state) => state.anecdotes, (state) => state.filter], (anecdotes, filter) => {
+      return anecdotes.filter(({ content }) => content.toLowerCase().includes(filter.toLowerCase()))
+    })
+  )
   const dispatch = useDispatch()
 
   const vote = (id) => {
