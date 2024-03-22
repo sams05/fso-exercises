@@ -9,6 +9,8 @@ const anecdotesAtStart = [
   'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
 ]
 
+const getId = () => (100000 * Math.random()).toFixed(0)
+
 const asObject = (anecdote) => {
   return {
     content: anecdote,
@@ -19,7 +21,6 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject)
 */
-const getId = () => (100000 * Math.random()).toFixed(0)
 
 const anecdoteSlice = createSlice({
   name: 'anecdote',
@@ -31,8 +32,8 @@ const anecdoteSlice = createSlice({
       anecdoteToUpdate.votes++
       return state
     },
-    anecdoteAdded(state, action) {
-      state.push({ content: action.payload, id: getId(), votes: 0 })
+    anecdoteAppended(state, action) {
+      state.push(action.payload)
     },
     anecdotesSet(state, action) {
       return action.payload
@@ -40,6 +41,6 @@ const anecdoteSlice = createSlice({
   }
 })
 
-export const { anecdoteVoted, anecdoteAdded, anecdotesSet } = anecdoteSlice.actions
+export const { anecdoteVoted, anecdoteAppended, anecdotesSet } = anecdoteSlice.actions
 
 export default anecdoteSlice.reducer
