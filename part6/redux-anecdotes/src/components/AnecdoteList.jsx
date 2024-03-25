@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
 import { anecdoteVoted } from '../reducers/anecdoteReducer'
 import { createSelector } from '@reduxjs/toolkit'
-import { notifyUser } from '../utils/helper'
+import { notificationSet } from '../reducers/notificationReducer'
 
 const Anecdote = ({ anecdote, handleClick }) => (
   <div>
@@ -33,7 +33,7 @@ const AnecdoteList = () => {
 
   const vote = ({ id, content }) => {
     dispatch(anecdoteVoted(id))
-    notifyUser(dispatch, `you voted "${content}"`, 5000)
+    dispatch(notificationSet(`you voted "${content}"`, 5))
   }
 
   const sortedAnecdotes = anecdotes.toSorted((anecdote1, anecdote2) => anecdote2.votes - anecdote1.votes)
