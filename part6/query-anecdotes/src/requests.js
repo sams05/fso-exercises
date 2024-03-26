@@ -12,4 +12,9 @@ const create = async (content) => {
   return response.data
 }
 
-export { getAll, create }
+const update = async (anecdote) => {
+  const response = await axios.put(`${BASE_URL}/${anecdote.id}`, anecdote)
+  return response.data
+}
+
+export { getAll, create, update }
