@@ -5,15 +5,16 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import { useDispatch } from 'react-redux'
+import { notificationSetTimed } from './reducers/notificationReducer'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState(false)
   const blogFormRef = useRef()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -28,14 +29,6 @@ const App = () => {
     }
   }, [])
 
-  const showNotification = (message, isError = false, time = 5000) => {
-    setMessage(message)
-    setError(isError)
-    setTimeout(() => {
-      setMessage('')
-    }, time)
-  }
-
   const handleLogin = async (e) => {
     e.preventDefault()
 
@@ -49,11 +42,11 @@ const App = () => {
     } catch (error) {
       if (error.response?.data?.error) {
         if (error.response.data.error === 'invalid username or password') {
-          return showNotification('wrong username or password', true)
+          return dispatch(notificationSetTimed('wrong username or password', true))
         }
-        return showNotification(error.response.data.error, true)
+        return dispatch(notificationSetTimed(error.response.data.error, true))
       }
-      showNotification(error.message, true)
+      dispatch(notificationSetTimed(error.message, true))
     }
   }
 
@@ -67,13 +60,13 @@ const App = () => {
     try {
       const newBlog = await blogService.create({ title, author, url })
       setBlogs(blogs.concat(newBlog))
-      showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+      dispatch(notificationSetTimed(`a new blog ${newBlog.title} by ${newBlog.author} added`))
       blogFormRef.current.toggleVisibility()
     } catch (error) {
       if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
+        return dispatch(notificationSetTimed(error.response.data.error, true))
       }
-      showNotification(error.message, true)
+      dispatch(notificationSetTimed(error.message, true))
     }
   }
 
@@ -84,9 +77,9 @@ const App = () => {
       setBlogs(blogs.map((blog) => (blog.id === savedBlog.id ? savedBlog : blog)))
     } catch (error) {
       if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
+        return dispatch(notificationSetTimed(error.response.data.error, true))
       }
-      showNotification(error.message, true)
+      dispatch(notificationSetTimed(error.message, true))
     }
   }
 
@@ -97,9 +90,9 @@ const App = () => {
       setBlogs(blogs.filter((blog) => blog.id !== id))
     } catch (error) {
       if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
+        return dispatch(notificationSetTimed(error.response.data.error, true))
       }
-      showNotification(error.message, true)
+      dispatch(notificationSetTimed(error.message, true))
     }
   }
 
@@ -108,7 +101,7 @@ const App = () => {
       return (
         <div>
           <h2>log in to application</h2>
-          <Notification message={message} isError={error} />
+          <Notification />
           <form data-testid="login-form" onSubmit={handleLogin}>
             <div>
               username
@@ -127,7 +120,7 @@ const App = () => {
     return (
       <div>
         <h2>blogs</h2>
-        <Notification message={message} isError={error} />
+        <Notification />
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
         <Togglable ref={blogFormRef} buttonLabel="create new blog">
