@@ -19,7 +19,7 @@ const useResource = (baseUrl) => {
   const [resources, setResources] = useState([])
 
   useEffect(() => {
-      getAll()
+    getAll()
   }, [])
 
   const getAll = async () => {
