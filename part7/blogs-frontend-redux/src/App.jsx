@@ -5,19 +5,20 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { notificationSetTimed } from './reducers/notificationReducer'
+import { blogsInitialized } from './reducers/blogsReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
   const dispatch = useDispatch()
+  const blogs = useSelector(({ blogs }) => blogs)
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    dispatch(blogsInitialized())
   }, [])
 
   useEffect(() => {
@@ -56,25 +57,12 @@ const App = () => {
     blogService.setToken(null)
   }
 
-  const createBlog = async ({ title, author, url }) => {
-    try {
-      const newBlog = await blogService.create({ title, author, url })
-      setBlogs(blogs.concat(newBlog))
-      dispatch(notificationSetTimed(`a new blog ${newBlog.title} by ${newBlog.author} added`))
-      blogFormRef.current.toggleVisibility()
-    } catch (error) {
-      if (error.response?.data?.error) {
-        return dispatch(notificationSetTimed(error.response.data.error, true))
-      }
-      dispatch(notificationSetTimed(error.message, true))
-    }
-  }
-
   const updateBlog = async (id, updatedBlog) => {
     try {
       const savedBlog = await blogService.update(id, updatedBlog)
       // Replace the updated blog on the blogs array
-      setBlogs(blogs.map((blog) => (blog.id === savedBlog.id ? savedBlog : blog)))
+      throw new Error('TODO')
+      //!TODO setBlogs(blogs.map((blog) => (blog.id === savedBlog.id ? savedBlog : blog)))
     } catch (error) {
       if (error.response?.data?.error) {
         return dispatch(notificationSetTimed(error.response.data.error, true))
@@ -87,7 +75,8 @@ const App = () => {
     try {
       await blogService.remove(id)
       // On successful removal, keep every blog that doesn't match the deleted one
-      setBlogs(blogs.filter((blog) => blog.id !== id))
+      throw new Error('todo')
+      //!TODO setBlogs(blogs.filter((blog) => blog.id !== id))
     } catch (error) {
       if (error.response?.data?.error) {
         return dispatch(notificationSetTimed(error.response.data.error, true))
@@ -124,7 +113,7 @@ const App = () => {
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
         <Togglable ref={blogFormRef} buttonLabel="create new blog">
-          <BlogForm createBlog={createBlog} />
+          <BlogForm blogFormRef={blogFormRef} />
         </Togglable>
         {blogs
           .toSorted((blog1, blog2) => blog2.likes - blog1.likes)

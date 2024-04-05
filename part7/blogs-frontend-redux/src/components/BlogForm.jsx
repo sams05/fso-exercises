@@ -1,9 +1,26 @@
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { newBlogSaved } from '../reducers/blogsReducer'
+import { notificationSetTimed } from '../reducers/notificationReducer'
 
-const BlogForm = ({ createBlog }) => {
+const BlogForm = ({ blogFormRef }) => {
+  const dispatch = useDispatch()
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+
+  const createBlog = async ({ title, author, url }) => {
+    try {
+      const newBlog = await dispatch(newBlogSaved({ title, author, url }))
+      dispatch(notificationSetTimed(`a new blog ${newBlog.title} by ${newBlog.author} added`))
+      blogFormRef.current.toggleVisibility()
+    } catch (error) {
+      if (error.response?.data?.error) {
+        return dispatch(notificationSetTimed(error.response.data.error, true))
+      }
+      dispatch(notificationSetTimed(error.message, true))
+    }
+  }
 
   const handleNewBlog = async (e) => {
     e.preventDefault()
