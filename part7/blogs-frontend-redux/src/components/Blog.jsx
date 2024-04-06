@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
+import { useDispatch } from 'react-redux'
+import { blogUpdateSaved, blogDeleteSaved } from '../reducers/blogsReducer'
+import { notificationSetTimed } from '../reducers/notificationReducer'
 
-const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
+const Blog = ({ loggedInUser, blog }) => {
+  const dispatch = useDispatch()
   const [detailVisible, setDetailVisible] = useState(false)
 
   const blogStyle = {
@@ -18,6 +22,30 @@ const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
 
   const showWhenVisible = {
     display: detailVisible ? '' : 'none',
+  }
+
+  const updateBlog = async (id, updatedBlog) => {
+    try {
+      await dispatch(blogUpdateSaved(id, updatedBlog))
+    } catch (error) {
+      if (error.response?.data?.error) {
+        dispatch(notificationSetTimed(error.response.data.error, true))
+        return
+      }
+      dispatch(notificationSetTimed(error.message, true))
+    }
+  }
+
+  const deleteBlog = async (id) => {
+    try {
+      await dispatch(blogDeleteSaved(id))
+    } catch (error) {
+      if (error.response?.data?.error) {
+        dispatch(notificationSetTimed(error.response.data.error, true))
+        return
+      }
+      dispatch(notificationSetTimed(error.message, true))
+    }
   }
 
   const incrementLikes = () => {
@@ -60,8 +88,6 @@ const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
 Blog.propTypes = {
   loggedInUser: PropTypes.object.isRequired,
   blog: PropTypes.object.isRequired,
-  updateBlog: PropTypes.func.isRequired,
-  deleteBlog: PropTypes.func.isRequired,
 }
 
 export default Blog
