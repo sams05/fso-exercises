@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { blogUpdateSaved, blogDeleteSaved } from '../reducers/blogsReducer'
 import { notificationSetTimed } from '../reducers/notificationReducer'
 
-const Blog = ({ loggedInUser, blog }) => {
+const Blog = ({ blog }) => {
   const dispatch = useDispatch()
+  const loggedInUser = useSelector(({ user }) => user)
   const [detailVisible, setDetailVisible] = useState(false)
 
   const blogStyle = {
@@ -86,7 +87,6 @@ const Blog = ({ loggedInUser, blog }) => {
 }
 
 Blog.propTypes = {
-  loggedInUser: PropTypes.object.isRequired,
   blog: PropTypes.object.isRequired,
 }
 
