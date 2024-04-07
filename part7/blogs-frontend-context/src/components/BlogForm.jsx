@@ -1,17 +1,37 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
+import NotificationContext from '../NotificationContext'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import blogService from '../services/blogs'
 
-const BlogForm = ({ createBlog }) => {
+const BlogForm = ({ blogFormRef }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const [, showNotification] = useContext(NotificationContext)
+  const queryClient = useQueryClient()
+  const newBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+      showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+      blogFormRef.current.toggleVisibility()
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    },
+    onError: (error) => {
+      if (error.response?.data?.error) {
+        return showNotification(error.response.data.error, true)
+      }
+      showNotification(error.message, true)
+    },
+  })
 
   const handleNewBlog = async (e) => {
     e.preventDefault()
 
-    await createBlog({ title, author, url })
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+    newBlogMutation.mutate({ title, author, url })
   }
 
   return (

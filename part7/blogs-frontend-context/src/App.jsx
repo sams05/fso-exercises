@@ -6,18 +6,19 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import { useQuery } from '@tanstack/react-query'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
   const [, showNotification] = useContext(NotificationContext)
 
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
-  }, [])
+  const blogsResult = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+  })
 
   useEffect(() => {
     const userJson = window.localStorage.getItem('blogAppUser')
@@ -27,6 +28,12 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  if (blogsResult.isLoading) {
+    return <div>Loading data...</div>
+  }
+
+  const blogs = blogsResult.data
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -53,20 +60,6 @@ const App = () => {
     setUser(null)
     window.localStorage.removeItem('blogAppUser')
     blogService.setToken(null)
-  }
-
-  const createBlog = async ({ title, author, url }) => {
-    try {
-      const newBlog = await blogService.create({ title, author, url })
-      setBlogs(blogs.concat(newBlog))
-      showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`)
-      blogFormRef.current.toggleVisibility()
-    } catch (error) {
-      if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
-      }
-      showNotification(error.message, true)
-    }
   }
 
   const updateBlog = async (id, updatedBlog) => {
@@ -123,7 +116,7 @@ const App = () => {
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
         <Togglable ref={blogFormRef} buttonLabel="create new blog">
-          <BlogForm createBlog={createBlog} />
+          <BlogForm blogFormRef={blogFormRef} />
         </Togglable>
         {blogs
           .toSorted((blog1, blog2) => blog2.likes - blog1.likes)
