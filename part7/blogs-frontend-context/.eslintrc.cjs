@@ -25,5 +25,6 @@ module.exports = {
     'no-console': 0,
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 0,
+    indent: ['error', 2, { SwitchCase: 1 }],
   },
 }

@@ -1,10 +1,15 @@
-const Notification = ({ message, isError = false }) => {
+import { useContext } from 'react'
+import NotificationContext from '../NotificationContext'
+
+const Notification = () => {
+  const [{ message, error }] = useContext(NotificationContext)
+
   const style = {
-    color: `${isError ? 'red' : 'green'}`,
-    border: `4px solid ${isError ? 'red' : 'green'}`,
+    color: `${error ? 'red' : 'green'}`,
+    border: `4px solid ${error ? 'red' : 'green'}`,
     borderRadius: '4px',
     backgroundColor: 'lightgray',
-    padding: '4px'
+    padding: '4px',
   }
 
   return Boolean(message) && <div style={style}>{message}</div>

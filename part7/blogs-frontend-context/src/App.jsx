@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
+import NotificationContext from './NotificationContext'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
@@ -11,9 +12,8 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState(false)
   const blogFormRef = useRef()
+  const [, showNotification] = useContext(NotificationContext)
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -27,14 +27,6 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
-
-  const showNotification = (message, isError = false, time = 5000) => {
-    setMessage(message)
-    setError(isError)
-    setTimeout(() => {
-      setMessage('')
-    }, time)
-  }
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -108,7 +100,7 @@ const App = () => {
       return (
         <div>
           <h2>log in to application</h2>
-          <Notification message={message} isError={error} />
+          <Notification />
           <form data-testid="login-form" onSubmit={handleLogin}>
             <div>
               username
@@ -127,7 +119,7 @@ const App = () => {
     return (
       <div>
         <h2>blogs</h2>
-        <Notification message={message} isError={error} />
+        <Notification />
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
         <Togglable ref={blogFormRef} buttonLabel="create new blog">
