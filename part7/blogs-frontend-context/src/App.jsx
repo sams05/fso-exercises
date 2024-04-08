@@ -62,32 +62,6 @@ const App = () => {
     blogService.setToken(null)
   }
 
-  const updateBlog = async (id, updatedBlog) => {
-    try {
-      const savedBlog = await blogService.update(id, updatedBlog)
-      // Replace the updated blog on the blogs array
-      setBlogs(blogs.map((blog) => (blog.id === savedBlog.id ? savedBlog : blog)))
-    } catch (error) {
-      if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
-      }
-      showNotification(error.message, true)
-    }
-  }
-
-  const deleteBlog = async (id) => {
-    try {
-      await blogService.remove(id)
-      // On successful removal, keep every blog that doesn't match the deleted one
-      setBlogs(blogs.filter((blog) => blog.id !== id))
-    } catch (error) {
-      if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
-      }
-      showNotification(error.message, true)
-    }
-  }
-
   const main = () => {
     if (user === null) {
       return (
@@ -121,7 +95,7 @@ const App = () => {
         {blogs
           .toSorted((blog1, blog2) => blog2.likes - blog1.likes)
           .map((blog) => (
-            <Blog key={blog.id} loggedInUser={user} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
+            <Blog key={blog.id} loggedInUser={user} blog={blog} />
           ))}
       </div>
     )

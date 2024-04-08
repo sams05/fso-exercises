@@ -1,8 +1,48 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import PropTypes from 'prop-types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import blogService from '../services/blogs'
+import NotificationContext from '../NotificationContext'
 
-const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
+const Blog = ({ loggedInUser, blog }) => {
   const [detailVisible, setDetailVisible] = useState(false)
+  const [, showNotification] = useContext(NotificationContext)
+  const queryClient = useQueryClient()
+  const updateBlogMutation = useMutation({
+    // Using wrapper function so that blogService.update retains its signature
+    mutationFn: async ({ id, updatedBlog }) => await blogService.update(id, updatedBlog),
+    onSuccess: (updatedBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      // Replace the updated blog on the blogs array
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog)),
+      )
+    },
+    onError: (error) => {
+      if (error.response?.data?.error) {
+        return showNotification(error.response.data.error, true)
+      }
+      showNotification(error.message, true)
+    },
+  })
+  const deleteBlogMutation = useMutation({
+    mutationFn: blogService.remove,
+    onSuccess: (result, id) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      // On successful removal, keep every blog that doesn't match the deleted one
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.filter((blog) => blog.id !== id),
+      )
+    },
+    onError: (error) => {
+      if (error.response?.data?.error) {
+        return showNotification(error.response.data.error, true)
+      }
+      showNotification(error.message, true)
+    },
+  })
 
   const blogStyle = {
     paddingTop: 10,
@@ -30,12 +70,12 @@ const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
       user: { id: user },
     } = blog
     // Increase likes by 1
-    updateBlog(id, { title, author, url, likes: likes + 1, user })
+    updateBlogMutation.mutate({ id, updatedBlog: { title, author, url, likes: likes + 1, user } })
   }
 
   const handleDelete = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      deleteBlog(blog.id)
+      deleteBlogMutation.mutate(blog.id)
     }
   }
 
@@ -60,8 +100,6 @@ const Blog = ({ loggedInUser, blog, updateBlog, deleteBlog }) => {
 Blog.propTypes = {
   loggedInUser: PropTypes.object.isRequired,
   blog: PropTypes.object.isRequired,
-  updateBlog: PropTypes.func.isRequired,
-  deleteBlog: PropTypes.func.isRequired,
 }
 
 export default Blog
