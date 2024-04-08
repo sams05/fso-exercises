@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useContext } from 'react'
-import NotificationContext from './NotificationContext'
+import NotificationContext from './contexts/NotificationContext'
+import UserContext from './contexts/UserContext'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
-import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import { useQuery } from '@tanstack/react-query'
@@ -11,9 +11,9 @@ import { useQuery } from '@tanstack/react-query'
 const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
   const blogFormRef = useRef()
   const [, showNotification] = useContext(NotificationContext)
+  const [user, userHelper] = useContext(UserContext)
 
   const blogsResult = useQuery({
     queryKey: ['blogs'],
@@ -21,13 +21,8 @@ const App = () => {
   })
 
   useEffect(() => {
-    const userJson = window.localStorage.getItem('blogAppUser')
-    if (userJson) {
-      const user = JSON.parse(userJson)
-      setUser(user)
-      blogService.setToken(user.token)
-    }
-  }, [])
+    userHelper.continueSession()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (blogsResult.isLoading) {
     return <div>Loading data...</div>
@@ -39,10 +34,7 @@ const App = () => {
     e.preventDefault()
 
     try {
-      const user = await loginService.login({ username, password })
-      setUser(user)
-      window.localStorage.setItem('blogAppUser', JSON.stringify(user))
-      blogService.setToken(user.token)
+      await userHelper.login({ username, password })
       setUsername('')
       setPassword('')
     } catch (error) {
@@ -57,9 +49,7 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    setUser(null)
-    window.localStorage.removeItem('blogAppUser')
-    blogService.setToken(null)
+    userHelper.logout()
   }
 
   const main = () => {
@@ -95,7 +85,7 @@ const App = () => {
         {blogs
           .toSorted((blog1, blog2) => blog2.likes - blog1.likes)
           .map((blog) => (
-            <Blog key={blog.id} loggedInUser={user} blog={blog} />
+            <Blog key={blog.id} blog={blog} />
           ))}
       </div>
     )

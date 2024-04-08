@@ -2,11 +2,13 @@ import { useState, useContext } from 'react'
 import PropTypes from 'prop-types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
-import NotificationContext from '../NotificationContext'
+import NotificationContext from '../contexts/NotificationContext'
+import UserContext from '../contexts/UserContext'
 
-const Blog = ({ loggedInUser, blog }) => {
+const Blog = ({ blog }) => {
   const [detailVisible, setDetailVisible] = useState(false)
   const [, showNotification] = useContext(NotificationContext)
+  const [loggedInUser] = useContext(UserContext)
   const queryClient = useQueryClient()
   const updateBlogMutation = useMutation({
     // Using wrapper function so that blogService.update retains its signature
@@ -98,7 +100,6 @@ const Blog = ({ loggedInUser, blog }) => {
 }
 
 Blog.propTypes = {
-  loggedInUser: PropTypes.object.isRequired,
   blog: PropTypes.object.isRequired,
 }
 

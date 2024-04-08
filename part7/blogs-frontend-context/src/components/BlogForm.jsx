@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import NotificationContext from '../NotificationContext'
+import NotificationContext from '../contexts/NotificationContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
 
