@@ -4,7 +4,7 @@ import UserContext from './contexts/UserContext'
 import Blogs from './components/Blogs'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Link } from 'react-router-dom'
 import Users from './components/Users'
 import User from './components/User'
 
@@ -40,6 +40,11 @@ const App = () => {
     userHelper.logout()
   }
 
+  const navbarStyle = {
+    backgroundColor: 'lightgray',
+    padding: 5,
+  }
+
   if (user === null) {
     return (
       <div>
@@ -62,11 +67,12 @@ const App = () => {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <div style={navbarStyle}>
+        <Link to="/">blogs</Link> <Link to="/users">users</Link> {user.name} logged in{' '}
+        <button onClick={handleLogout}>logout</button>
+      </div>
       <Notification />
-      {user.name} logged in
-      <br />
-      <button onClick={handleLogout}>logout</button>
+      <h2>blog app</h2>
       <Routes>
         <Route path="/" element={<Blogs />} />
         <Route path="/blogs/:id" element={<Blog />} />
