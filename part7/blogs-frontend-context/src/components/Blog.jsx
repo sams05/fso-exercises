@@ -1,25 +1,38 @@
-import { useState, useContext } from 'react'
-import PropTypes from 'prop-types'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useContext } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
 import NotificationContext from '../contexts/NotificationContext'
 import UserContext from '../contexts/UserContext'
+import { useParams, useNavigate } from 'react-router-dom'
 
-const Blog = ({ blog }) => {
-  const [detailVisible, setDetailVisible] = useState(false)
+const Blog = () => {
+  const id = useParams().id
+
+  const blogResult = useQuery({
+    queryKey: ['blog', id],
+    queryFn: () => blogService.getOne(id),
+  })
+
   const [, showNotification] = useContext(NotificationContext)
   const [loggedInUser] = useContext(UserContext)
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const updateBlogMutation = useMutation({
     // Using wrapper function so that blogService.update retains its signature
     mutationFn: async ({ id, updatedBlog }) => await blogService.update(id, updatedBlog),
     onSuccess: (updatedBlog) => {
+      // Update data for array of blogs rendered on the view for list of blogs
       const blogs = queryClient.getQueryData(['blogs'])
       // Replace the updated blog on the blogs array
-      queryClient.setQueryData(
-        ['blogs'],
-        blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog)),
-      )
+      if (blogs) {
+        queryClient.setQueryData(
+          ['blogs'],
+          blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog)),
+        )
+      }
+
+      // Update data for individual blog
+      queryClient.invalidateQueries({ queryKey: ['blog', updatedBlog.id] })
     },
     onError: (error) => {
       if (error.response?.data?.error) {
@@ -31,12 +44,20 @@ const Blog = ({ blog }) => {
   const deleteBlogMutation = useMutation({
     mutationFn: blogService.remove,
     onSuccess: (result, id) => {
+      // Update data for array of blogs rendered on the view for list of blogs
       const blogs = queryClient.getQueryData(['blogs'])
       // On successful removal, keep every blog that doesn't match the deleted one
-      queryClient.setQueryData(
-        ['blogs'],
-        blogs.filter((blog) => blog.id !== id),
-      )
+      if (blogs) {
+        queryClient.setQueryData(
+          ['blogs'],
+          blogs.filter((blog) => blog.id !== id),
+        )
+      }
+
+      // Update data for individual blog
+      queryClient.removeQueries({ queryKey: ['blog', id], exact: true })
+
+      navigate('/')
     },
     onError: (error) => {
       if (error.response?.data?.error) {
@@ -46,20 +67,18 @@ const Blog = ({ blog }) => {
     },
   })
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
+  if (blogResult.isLoading) {
+    return <div>Loading data...</div>
   }
+
+  if (blogResult.isError) {
+    return <div>Failed to load data</div>
+  }
+
+  const blog = blogResult.data
 
   const pStyle = {
     marginBlock: 2,
-  }
-
-  const showWhenVisible = {
-    display: detailVisible ? '' : 'none',
   }
 
   const incrementLikes = () => {
@@ -82,25 +101,22 @@ const Blog = ({ blog }) => {
   }
 
   return (
-    <div style={blogStyle} data-testid="blog">
-      <div className="blog-heading">
+    <>
+      <h2 className="blog-heading">
         {blog.title} {blog.author}
-        <button onClick={() => setDetailVisible(!detailVisible)}>{detailVisible ? 'hide' : 'view'}</button>
-      </div>
-      <div style={showWhenVisible} className="blog-details">
-        <p style={pStyle}>{blog.url}</p>
+      </h2>
+      <div className="blog-details">
+        <a style={pStyle} href={blog.url}>
+          {blog.url}
+        </a>
         <p style={pStyle}>
           likes {blog.likes} <button onClick={incrementLikes}>like</button>
         </p>
-        <p style={pStyle}>{blog.user.name}</p>
+        <p style={pStyle}>added by {blog.user.name}</p>
         {loggedInUser.username === blog.user.username && <button onClick={handleDelete}>remove</button>}
       </div>
-    </div>
+    </>
   )
-}
-
-Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
 }
 
 export default Blog

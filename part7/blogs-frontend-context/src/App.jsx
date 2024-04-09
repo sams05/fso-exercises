@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import NotificationContext from './contexts/NotificationContext'
 import UserContext from './contexts/UserContext'
 import Blogs from './components/Blogs'
+import Blog from './components/Blog'
 import Notification from './components/Notification'
 import { Routes, Route } from 'react-router-dom'
 import Users from './components/Users'
@@ -64,9 +65,11 @@ const App = () => {
       <h2>blogs</h2>
       <Notification />
       {user.name} logged in
+      <br />
       <button onClick={handleLogout}>logout</button>
       <Routes>
         <Route path="/" element={<Blogs />} />
+        <Route path="/blogs/:id" element={<Blog />} />
         <Route path="/users" element={<Users />} />
         <Route path="/users/:id" element={<User />} />
       </Routes>
