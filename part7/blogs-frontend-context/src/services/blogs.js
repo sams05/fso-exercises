@@ -23,6 +23,12 @@ const create = async (newBlog) => {
   return response.data
 }
 
+const createComment = async (id, comment) => {
+  const config = { headers: { Authorization: `Bearer ${token}` } }
+  const response = await axios.post(`${baseUrl}/${id}/comments`, { comment }, config)
+  return response.data
+}
+
 const update = async (id, updatedBlog) => {
   const config = { headers: { Authorization: `Bearer ${token}` } }
   const response = await axios.put(`${baseUrl}/${id}`, updatedBlog, config)
@@ -35,4 +41,4 @@ const remove = async (id) => {
   return response.data
 }
 
-export default { setToken, getAll, getOne, create, update, remove }
+export default { setToken, getAll, getOne, create, createComment, update, remove }

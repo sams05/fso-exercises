@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
 import NotificationContext from '../contexts/NotificationContext'
@@ -16,30 +16,41 @@ const Blog = () => {
   const [, showNotification] = useContext(NotificationContext)
   const [loggedInUser] = useContext(UserContext)
   const navigate = useNavigate()
+  const [comment, setComment] = useState('')
+
+  const handleError = (error) => {
+    if (error.response?.data?.error) {
+      return showNotification(error.response.data.error, true)
+    }
+    showNotification(error.message, true)
+  }
+  const handleBlogUpdate = (updatedBlog) => {
+    // Update data for array of blogs rendered on the view for list of blogs
+    const blogs = queryClient.getQueryData(['blogs'])
+    // Replace the updated blog on the blogs array
+    if (blogs) {
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog)),
+      )
+    }
+
+    // Update data for individual blog
+    queryClient.invalidateQueries({ queryKey: ['blog', updatedBlog.id] })
+  }
+
   const queryClient = useQueryClient()
   const updateBlogMutation = useMutation({
     // Using wrapper function so that blogService.update retains its signature
-    mutationFn: async ({ id, updatedBlog }) => await blogService.update(id, updatedBlog),
-    onSuccess: (updatedBlog) => {
-      // Update data for array of blogs rendered on the view for list of blogs
-      const blogs = queryClient.getQueryData(['blogs'])
-      // Replace the updated blog on the blogs array
-      if (blogs) {
-        queryClient.setQueryData(
-          ['blogs'],
-          blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog)),
-        )
-      }
-
-      // Update data for individual blog
-      queryClient.invalidateQueries({ queryKey: ['blog', updatedBlog.id] })
-    },
-    onError: (error) => {
-      if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
-      }
-      showNotification(error.message, true)
-    },
+    mutationFn: ({ id, updatedBlog }) => blogService.update(id, updatedBlog),
+    onSuccess: handleBlogUpdate,
+    onError: handleError,
+  })
+  const addBlogCommentMutation = useMutation({
+    // Using wrapper function so that blogService.createComment retains its signature
+    mutationFn: ({ id, comment }) => blogService.createComment(id, comment),
+    onSuccess: handleBlogUpdate,
+    onError: handleError,
   })
   const deleteBlogMutation = useMutation({
     mutationFn: blogService.remove,
@@ -59,12 +70,7 @@ const Blog = () => {
 
       navigate('/')
     },
-    onError: (error) => {
-      if (error.response?.data?.error) {
-        return showNotification(error.response.data.error, true)
-      }
-      showNotification(error.message, true)
-    },
+    onError: handleError,
   })
 
   if (blogResult.isLoading) {
@@ -89,15 +95,27 @@ const Blog = () => {
       url,
       likes,
       user: { id: user },
+      comments,
     } = blog
     // Increase likes by 1
-    updateBlogMutation.mutate({ id, updatedBlog: { title, author, url, likes: likes + 1, user } })
+    updateBlogMutation.mutate({ id, updatedBlog: { title, author, url, likes: likes + 1, user, comments } })
   }
 
   const handleDelete = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       deleteBlogMutation.mutate(blog.id)
     }
+  }
+
+  const handleNewComment = (e) => {
+    e.preventDefault()
+
+    const { id } = blog
+
+    addBlogCommentMutation.mutate({
+      id,
+      comment,
+    })
   }
 
   return (
@@ -117,6 +135,10 @@ const Blog = () => {
       </div>
       <div className="blog-comments">
         <h3>comments</h3>
+        <form onSubmit={handleNewComment}>
+          <input type="text" value={comment} onChange={({ target }) => setComment(target.value)} />
+          <button type="submit">add comment</button>
+        </form>
         <ul>
           {/* Using index for the key since there delete functionality and insertion only occur at the end */}
           {blog.comments.map((comment, idx) => (
