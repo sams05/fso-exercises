@@ -115,6 +115,15 @@ const Blog = () => {
         <p style={pStyle}>added by {blog.user.name}</p>
         {loggedInUser.username === blog.user.username && <button onClick={handleDelete}>remove</button>}
       </div>
+      <div className="blog-comments">
+        <h3>comments</h3>
+        <ul>
+          {/* Using index for the key since there delete functionality and insertion only occur at the end */}
+          {blog.comments.map((comment, idx) => (
+            <li key={idx}>{comment}</li>
+          ))}
+        </ul>
+      </div>
     </>
   )
 }

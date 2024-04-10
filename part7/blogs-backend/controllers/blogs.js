@@ -52,4 +52,19 @@ blogsRouter.put('/:id', async (request, response) => {
   response.json(await updatedBlog.populate('user', { username: 1, name: 1 }))
 })
 
+// ------- Commenting -------
+
+// Apply userExtractor middleware to make sure commenter is logged in
+blogsRouter.post('/:id/comments', middleware.userExtractor, async (request, response) => {
+  const blog = await Blog.findById(request.params.id)
+  if (!blog) {
+    response.status(404).end()
+  }
+
+  const { comment } = request.body
+  blog.comments.push(comment)
+  await blog.save()
+  response.status(201).json(await blog.populate('user', { username: 1, name: 1 }))
+})
+
 module.exports = blogsRouter
