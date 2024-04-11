@@ -4,6 +4,9 @@ import blogService from '../services/blogs'
 import NotificationContext from '../contexts/NotificationContext'
 import UserContext from '../contexts/UserContext'
 import { useParams, useNavigate } from 'react-router-dom'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 
 const Blog = () => {
   const id = useParams().id
@@ -49,7 +52,10 @@ const Blog = () => {
   const addBlogCommentMutation = useMutation({
     // Using wrapper function so that blogService.createComment retains its signature
     mutationFn: ({ id, comment }) => blogService.createComment(id, comment),
-    onSuccess: handleBlogUpdate,
+    onSuccess: (updatedBlog) => {
+      handleBlogUpdate(updatedBlog)
+      setComment('')
+    },
     onError: handleError,
   })
   const deleteBlogMutation = useMutation({
@@ -120,24 +126,40 @@ const Blog = () => {
 
   return (
     <>
-      <h2 className="blog-heading">
+      <Typography variant="h4" className="blog-heading">
         {blog.title} {blog.author}
-      </h2>
+      </Typography>
       <div className="blog-details">
         <a style={pStyle} href={blog.url}>
           {blog.url}
         </a>
         <p style={pStyle}>
-          likes {blog.likes} <button onClick={incrementLikes}>like</button>
+          likes {blog.likes}{' '}
+          <Button variant="outlined" color="primary" size="small" onClick={incrementLikes}>
+            like
+          </Button>
         </p>
         <p style={pStyle}>added by {blog.user.name}</p>
-        {loggedInUser.username === blog.user.username && <button onClick={handleDelete}>remove</button>}
+        {loggedInUser.username === blog.user.username && (
+          <Button variant="contained" color="error" size="small" onClick={handleDelete}>
+            remove
+          </Button>
+        )}
       </div>
       <div className="blog-comments">
-        <h3>comments</h3>
-        <form onSubmit={handleNewComment}>
-          <input type="text" value={comment} onChange={({ target }) => setComment(target.value)} />
-          <button type="submit">add comment</button>
+        <Typography variant="h5">comments</Typography>
+        <form onSubmit={handleNewComment} style={{ display: 'flex', alignItems: 'center' }}>
+          <TextField
+            size="small"
+            type="text"
+            margin="none"
+            label="comment"
+            value={comment}
+            onChange={({ target }) => setComment(target.value)}
+          />
+          <Button variant="contained" color="primary" size="small" type="submit">
+            add comment
+          </Button>
         </form>
         <ul>
           {/* Using index for the key since there delete functionality and insertion only occur at the end */}

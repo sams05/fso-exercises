@@ -7,6 +7,15 @@ import Notification from './components/Notification'
 import { Routes, Route, Link } from 'react-router-dom'
 import Users from './components/Users'
 import User from './components/User'
+import Container from '@mui/material/Container'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardHeader from '@mui/material/CardHeader'
+import Typography from '@mui/material/Typography'
+import AppBar from '@mui/material/AppBar'
+import Toolbar from '@mui/material/Toolbar'
+import Box from '@mui/material/Box'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -40,46 +49,80 @@ const App = () => {
     userHelper.logout()
   }
 
-  const navbarStyle = {
-    backgroundColor: 'lightgray',
-    padding: 5,
-  }
-
   if (user === null) {
     return (
-      <div>
-        <h2>log in to application</h2>
-        <Notification />
-        <form data-testid="login-form" onSubmit={handleLogin}>
-          <div>
-            username
-            <input type="text" value={username} onChange={({ target }) => setUsername(target.value)} />
-          </div>
-          <div>
-            password
-            <input type="password" value={password} onChange={({ target }) => setPassword(target.value)} />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
+      <Container>
+        <Card
+          raised
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            margin: '0 auto',
+            padding: '20px 10px',
+            width: 300,
+          }}
+        >
+          <CardHeader className="MuiCardHeader-title" title="log in to application" />
+          <Notification />
+          <form onSubmit={handleLogin}>
+            <div>
+              <TextField
+                size="small"
+                type="text"
+                margin="dense"
+                label="username"
+                value={username}
+                onChange={({ target }) => setUsername(target.value)}
+              />
+            </div>
+            <div>
+              <TextField
+                size="small"
+                type="password"
+                margin="dense"
+                label="password"
+                value={password}
+                onChange={({ target }) => setPassword(target.value)}
+              />
+            </div>
+            <Button variant="contained" color="primary" type="submit">
+              login
+            </Button>
+          </form>
+        </Card>
+      </Container>
     )
   }
 
   return (
-    <div>
-      <div style={navbarStyle}>
-        <Link to="/">blogs</Link> <Link to="/users">users</Link> {user.name} logged in{' '}
-        <button onClick={handleLogout}>logout</button>
-      </div>
+    <Container>
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/">
+            blogs
+          </Button>
+          <Button color="inherit" component={Link} to="/users">
+            users
+          </Button>
+          <Box sx={{ flexGrow: 1 }} />
+          <Typography component="div">{user.name} logged in </Typography>
+          <Button color="inherit" onClick={handleLogout}>
+            logout
+          </Button>
+        </Toolbar>
+      </AppBar>
       <Notification />
-      <h2>blog app</h2>
+      <Typography variant="h2" sx={{ textAlign: 'center' }}>
+        blog app
+      </Typography>
       <Routes>
         <Route path="/" element={<Blogs />} />
         <Route path="/blogs/:id" element={<Blog />} />
         <Route path="/users" element={<Users />} />
         <Route path="/users/:id" element={<User />} />
       </Routes>
-    </div>
+    </Container>
   )
 }
 

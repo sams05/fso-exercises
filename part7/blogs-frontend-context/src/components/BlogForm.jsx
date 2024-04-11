@@ -2,6 +2,8 @@ import { useState, useContext } from 'react'
 import NotificationContext from '../contexts/NotificationContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
 
 const BlogForm = ({ blogFormRef }) => {
   const [title, setTitle] = useState('')
@@ -39,18 +41,41 @@ const BlogForm = ({ blogFormRef }) => {
       <h2>create new</h2>
       <form onSubmit={handleNewBlog}>
         <div>
-          title:
-          <input type="text" id="title" value={title} onChange={({ target }) => setTitle(target.value)} />
+          <TextField
+            id="title"
+            size="small"
+            type="text"
+            margin="dense"
+            label="title"
+            value={title}
+            onChange={({ target }) => setTitle(target.value)}
+          />
         </div>
         <div>
-          author:
-          <input type="text" id="author" value={author} onChange={({ target }) => setAuthor(target.value)} />
+          <TextField
+            id="author"
+            size="small"
+            type="text"
+            margin="dense"
+            label="author"
+            value={author}
+            onChange={({ target }) => setAuthor(target.value)}
+          />
         </div>
         <div>
-          url:
-          <input type="text" id="url" value={url} onChange={({ target }) => setUrl(target.value)} />
+          <TextField
+            id="url"
+            size="small"
+            type="text"
+            margin="dense"
+            label="url"
+            value={url}
+            onChange={({ target }) => setUrl(target.value)}
+          />
         </div>
-        <button type="submit">create</button>
+        <Button variant="contained" color="primary" size="small" type="submit">
+          create
+        </Button>
       </form>
     </div>
   )
